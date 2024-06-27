@@ -92,46 +92,6 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
             <Ionicons name="options-outline" size={24} />
           </TouchableOpacity>
         </View>
-
-        <ScrollView
-          horizontal
-          ref={scrollRef}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{
-            alignItems: "center",
-            gap: 20,
-            paddingHorizontal: 16,
-            paddingVertical: 6,
-          }}
-        >
-          {categories.map((item, index) => (
-            <TouchableOpacity
-              key={index}
-              ref={(el) => (itemsRef.current[index] = el)}
-              style={
-                activeIndex === index
-                  ? styles.categoriesBtnActive
-                  : styles.categoriesBtn
-              }
-              onPress={() => selectCategory(index)}
-            >
-              <MaterialIcons
-                name={item.icon as any}
-                size={24}
-                color={activeIndex === index ? "#000" : Colors.grey}
-              />
-              <Text
-                style={
-                  activeIndex === index
-                    ? styles.categoryTextActive
-                    : styles.categoryText
-                }
-              >
-                {item.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
       </View>
     </SafeAreaView>
   );
@@ -140,7 +100,7 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
-    height: 160,
+    height: 130,
   },
   actionRow: {
     flexDirection: "row",
