@@ -25,6 +25,7 @@ export const defaultStyles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontFamily: "aeonik",
+    lineHeight: 20,
   },
   btnIcon: {
     position: "absolute",

@@ -4,14 +4,15 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  Alert,
 } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { useWarmUpBrowser } from "@/hooks/useWarmUpBrowser";
 import { defaultStyles } from "@/constants/Styles";
 import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
-import { useOAuth } from "@clerk/clerk-expo";
-import { useRouter } from "expo-router";
+import { useOAuth, useSignUp } from "@clerk/clerk-expo";
+import { Link, useRouter } from "expo-router";
 
 enum Strategy {
   Apple = "oauth_apple",
@@ -22,6 +23,10 @@ enum Strategy {
 const Page = () => {
   useWarmUpBrowser();
   const router = useRouter();
+  const { isLoaded, signUp, setActive } = useSignUp();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const { startOAuthFlow: appleAuth } = useOAuth({ strategy: "oauth_apple" });
   const { startOAuthFlow: googleAuth } = useOAuth({
@@ -41,16 +46,51 @@ const Page = () => {
     try {
       const { createdSessionId, setActive } = await selectedAuth();
       console.log(
-        " ~ file: login.tsx:41 ~ onSelectAuth ~ createdSessionId",
+        " ~ file: signUp.tsx:41 ~ onSelectAuth ~ createdSessionId",
         createdSessionId
       );
 
       if (createdSessionId) {
         setActive!({ session: createdSessionId });
-        router.back();
+        router.replace("/(tabs)");
       }
     } catch (error) {
       console.error("OAuth error: ", error);
+      Alert.alert("Error", "Authentication failed. Please try again.");
+    }
+  };
+
+  const onSignUpWithEmail = async () => {
+    if (!isLoaded) {
+      Alert.alert(
+        "Error",
+        "Authentication is not ready yet. Please try again."
+      );
+      return;
+    }
+
+    if (!email || !password) {
+      Alert.alert(
+        "Missing Information",
+        "Please enter both email and password."
+      );
+      return;
+    }
+
+    try {
+      await signUp.create({
+        emailAddress: email,
+        password,
+      });
+
+      // Send email verification code
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+
+      // Navigate to email verification page
+      router.push("/verify-email");
+    } catch (err: any) {
+      console.error("Error:", err);
+      Alert.alert("Sign Up Error", err.errors[0].message);
     }
   };
 
@@ -59,11 +99,28 @@ const Page = () => {
       <TextInput
         autoCapitalize="none"
         placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
         style={[defaultStyles.inputField, { marginBottom: 30 }]}
       />
-      <TouchableOpacity style={defaultStyles.btn}>
-        <Text style={defaultStyles.btnText}>Continue</Text>
+      <TextInput
+        autoCapitalize="none"
+        placeholder="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        style={[defaultStyles.inputField, { marginBottom: 30 }]}
+      />
+      <TouchableOpacity style={defaultStyles.btn} onPress={onSignUpWithEmail}>
+        <Text style={defaultStyles.btnText}>Sign Up with Email</Text>
       </TouchableOpacity>
+      <Link href={"/emailLogin"} replace asChild>
+        <TouchableOpacity>
+          <Text style={{ textAlign: "center", color: Colors.primary, top: 10 }}>
+            Already have an account? Log in
+          </Text>
+        </TouchableOpacity>
+      </Link>
       <View style={styles.seperatorView}>
         <View
           style={{
@@ -83,14 +140,6 @@ const Page = () => {
       </View>
 
       <View style={{ gap: 26 }}>
-        <TouchableOpacity style={styles.btnOutline}>
-          <Ionicons
-            name="call-outline"
-            size={24}
-            style={defaultStyles.btnIcon}
-          />
-          <Text style={styles.btnOutlineText}>Continue with Phone</Text>
-        </TouchableOpacity>
         <TouchableOpacity
           style={styles.btnOutline}
           onPress={() => onSelectAuth(Strategy.Apple)}
