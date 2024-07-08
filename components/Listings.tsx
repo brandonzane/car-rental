@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
+  RefreshControl,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { defaultStyles } from "@/constants/Styles";
@@ -15,11 +16,24 @@ import { Ionicons } from "@expo/vector-icons";
 interface Props {
   listings: any[];
   category: string;
+  refresh: number;
 }
 
-const Listings = ({ listings: items, category }: Props) => {
+const Listings = ({ listings: items, category, refresh }: Props) => {
   const [loading, setLoading] = useState(false);
   const listRef = useRef<FlatList>(null);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    if (refresh) {
+      scrollListTop();
+    }
+  }, [refresh]);
+
+  const scrollListTop = () => {
+    listRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
 
   useEffect(() => {
     console.log("RELOAD LISTINGS: ", items.length);
@@ -30,6 +44,13 @@ const Listings = ({ listings: items, category }: Props) => {
     }, 200);
   }, [category]);
 
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  }, []);
+
   const renderRow: ListRenderItem<any> = ({ item }) => (
     <Link href={`/listing/${item.id}`} asChild>
       <TouchableOpacity>
@@ -38,7 +59,7 @@ const Listings = ({ listings: items, category }: Props) => {
           <TouchableOpacity
             style={{ position: "absolute", top: 30, right: 30 }}
           >
-            <Ionicons name="heart-outline" size={24} color={"#000"} />
+            <Ionicons name="bookmark-outline" size={25} color={"#fff"} />
           </TouchableOpacity>
 
           <View style={{ flexDirection: "row" }}>
@@ -56,7 +77,7 @@ const Listings = ({ listings: items, category }: Props) => {
           </View>
 
           <Text style={{ fontFamily: "aeonik", lineHeight: 15 }}>
-            {item.room_type}
+            {item.car_type}
           </Text>
 
           <View style={{ flexDirection: "row", gap: 4 }}>
@@ -76,6 +97,9 @@ const Listings = ({ listings: items, category }: Props) => {
         renderItem={renderRow}
         ref={listRef}
         data={loading ? [] : items}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       />
     </View>
   );

@@ -72,7 +72,7 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
                 <Ionicons name="search" size={24} />
                 <View>
                   <Text style={{ fontFamily: "aeonik", marginBottom: 5 }}>
-                    Where to?
+                    Drive?
                   </Text>
                   <Text
                     style={{
@@ -81,7 +81,7 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
                       lineHeight: 14,
                     }}
                   >
-                    Anywhere · Any week
+                    Where to?
                   </Text>
                 </View>
               </View>
