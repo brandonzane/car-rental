@@ -6,16 +6,41 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
+  SafeAreaView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useUser, useAuth, useClerk } from "@clerk/clerk-expo";
+import Colors from "@/constants/Colors";
+
+const CustomHeader = () => {
+  const navigation = useNavigation();
+
+  return (
+    <SafeAreaView style={styles.headerContainer}>
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={styles.backButton}
+      >
+        <Ionicons name="chevron-back" size={28} color={Colors.black} />
+      </TouchableOpacity>
+      <Text style={styles.headerTitle}>Your Account</Text>
+      <View style={styles.placeholder} />
+    </SafeAreaView>
+  );
+};
 
 const ProfilePage = () => {
   const navigation = useNavigation();
   const { user } = useUser();
   const { signOut } = useClerk();
   const [isLoading, setIsLoading] = useState(false);
+
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      header: () => <CustomHeader />,
+    });
+  }, [navigation]);
 
   const handleLogout = async () => {
     Alert.alert("Logout", "Are you sure you want to log out?", [
@@ -123,7 +148,7 @@ const ProfilePage = () => {
 
       {isLoading && (
         <View style={styles.loadingOverlay}>
-          <Text style={styles.loadingText}>Processing...</Text>
+          <Text style={styles.loadingText}>deleting account...</Text>
         </View>
       )}
     </View>
@@ -133,14 +158,32 @@ const ProfilePage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: Colors.quaternary,
+    fontFamily: "aeonik",
+  },
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingTop: 25,
+    paddingBottom: 10,
+    backgroundColor: Colors.quaternary,
+  },
+  backButton: {
+    padding: 8,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontFamily: "aeonikLight",
+  },
+  placeholder: {
+    width: 28, // To balance the back button
   },
   header: {
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    backgroundColor: Colors.quaternary,
   },
   profilePicture: {
     width: 120,
@@ -152,14 +195,18 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 5,
+    fontFamily: "aeonik",
+    lineHeight: 25,
   },
   email: {
     fontSize: 16,
-    color: "#666",
+    color: Colors.grey,
+    fontFamily: "aeonik",
+    lineHeight: 15,
   },
   infoSection: {
     margin: 20,
-    backgroundColor: "#fff",
+    backgroundColor: Colors.quaternary,
     borderRadius: 10,
     padding: 15,
   },
@@ -167,6 +214,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 15,
+    fontFamily: "aeonik",
   },
   infoRow: {
     flexDirection: "row",
@@ -181,22 +229,28 @@ const styles = StyleSheet.create({
     margin: 20,
   },
   button: {
-    backgroundColor: "#007AFF",
+    backgroundColor: "#FFF",
     padding: 15,
     borderRadius: 5,
     alignItems: "center",
     marginBottom: 10,
+    fontFamily: "aeonik",
+    borderWidth: 2,
   },
   buttonText: {
-    color: "#fff",
+    color: Colors.black,
     fontSize: 16,
     fontWeight: "bold",
+    fontFamily: "aeonik",
   },
   deleteButton: {
-    backgroundColor: "#FF3B30",
+    backgroundColor: "#FFF",
+    borderWidth: 2,
+    fontFamily: "aeonik",
   },
   deleteButtonText: {
-    color: "#fff",
+    color: Colors.secondary,
+    fontFamily: "aeonik",
   },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -205,7 +259,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   loadingText: {
-    color: "#fff",
+    color: "#FFF",
     fontSize: 18,
     fontWeight: "bold",
   },

@@ -10,7 +10,7 @@ import ListingsBottomSheet from "@/components/ListingsBottomSheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const Home = () => {
-  const [category, setCategory] = useState<string>("Tiny homes");
+  const [category, setCategory] = useState<string>("Vehicles");
   const items = useMemo(() => listingsData as any, []);
 
   const onDataChanged = (category: string) => {

@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "car-rental",
-    "slug": "car-rental",
-    "version": "1.0.0",
+    "name": "drive-app",
+    "slug": "drive-app",
+    "version": "0.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -26,13 +26,18 @@
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-    "plugins": [
-      "expo-router",
-      "expo-secure-store"
-    ],
+    "plugins": ["expo-router", "expo-secure-store"],
     "experiments": {
       "typedRoutes": true,
       "tsconfigPaths": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "f1a47fe9-70fb-4a0d-99bb-b1cc93c66371"
+      }
     }
   }
 }

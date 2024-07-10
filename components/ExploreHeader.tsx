@@ -106,9 +106,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: 24,
+    paddingHorizontal: 24,
     paddingTop: 32,
-    paddingBottom: 16,
   },
   filterBtn: {
     padding: 10,

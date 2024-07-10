@@ -55,7 +55,7 @@ const ListingsBottomSheet = ({ listings, category }: Props) => {
 const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
-    backgroundColor: "#2a9ac7",
+    backgroundColor: Colors.quaternary,
   },
   absoluteView: {
     position: "absolute",

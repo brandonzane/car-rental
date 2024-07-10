@@ -7,7 +7,12 @@ import {
   TouchableOpacity,
   Image,
   RefreshControl,
+  Dimensions,
 } from "react-native";
+import {
+  BottomSheetFlatList,
+  BottomSheetFlatListMethods,
+} from "@gorhom/bottom-sheet";
 import React, { useEffect, useRef, useState } from "react";
 import { defaultStyles } from "@/constants/Styles";
 import { Link } from "expo-router";
@@ -19,41 +24,37 @@ interface Props {
   refresh: number;
 }
 
-const Listings = ({ listings: items, category, refresh }: Props) => {
-  const [loading, setLoading] = useState(false);
-  const listRef = useRef<FlatList>(null);
+const Listings = ({ listings: items, refresh, category }: Props) => {
+  // Ref for BottomSheetFlatList
+  const listRef = useRef<BottomSheetFlatListMethods>(null);
+  // State to control loading state
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const [refreshing, setRefreshing] = useState(false);
-
+  // Update the view to scroll the list back to the top when refresh is triggered
   useEffect(() => {
     if (refresh) {
       scrollListTop();
     }
   }, [refresh]);
 
+  // Scroll the list to the top
   const scrollListTop = () => {
     listRef.current?.scrollToOffset({ offset: 0, animated: true });
   };
 
+  // Use for "updating" the views data after the category changes
   useEffect(() => {
-    console.log("RELOAD LISTINGS: ", items.length);
     setLoading(true);
 
+    // Simulate a loading delay
     setTimeout(() => {
       setLoading(false);
     }, 200);
   }, [category]);
 
-  const onRefresh = React.useCallback(() => {
-    setRefreshing(true);
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 2000);
-  }, []);
-
   const renderRow: ListRenderItem<any> = ({ item }) => (
     <Link href={`/listing/${item.id}`} asChild>
-      <TouchableOpacity>
+      <TouchableOpacity activeOpacity={0.9}>
         <View style={styles.listing}>
           <Image source={{ uri: item.medium_url }} style={styles.image} />
           <TouchableOpacity
@@ -62,29 +63,23 @@ const Listings = ({ listings: items, category, refresh }: Props) => {
             <Ionicons name="bookmark-outline" size={25} color={"#fff"} />
           </TouchableOpacity>
 
-          <View style={{ flexDirection: "row" }}>
-            <Text
-              style={{ fontFamily: "aeonik", fontSize: 16, lineHeight: 15 }}
-            >
-              {item.name}
-            </Text>
-            <View style={{ flexDirection: "row", gap: 4 }}>
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
+          >
+            <Text style={styles.listingText}>{item.name}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
               <Ionicons name="star" size={16} />
-              <Text style={{ fontFamily: "aeonik", lineHeight: 15 }}>
+              <Text style={styles.listingText}>
                 {item.review_scores_rating / 20}
               </Text>
             </View>
           </View>
 
-          <Text style={{ fontFamily: "aeonik", lineHeight: 15 }}>
-            {item.car_type}
-          </Text>
+          <Text style={styles.listingText}>{item.car_type}</Text>
 
-          <View style={{ flexDirection: "row", gap: 4 }}>
-            <Text style={{ fontFamily: "aeonik", lineHeight: 15 }}>
-              $ {item.price}
-            </Text>
-            <Text style={{ fontFamily: "aeonik", lineHeight: 15 }}>/day</Text>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Text style={styles.listingText}>$ {item.price}</Text>
+            <Text style={styles.listingText}>/day</Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -93,12 +88,14 @@ const Listings = ({ listings: items, category, refresh }: Props) => {
 
   return (
     <View style={defaultStyles.container}>
-      <FlatList
+      {/* BottomSheetFlatList for displaying listings */}
+      <BottomSheetFlatList
         renderItem={renderRow}
-        ref={listRef}
         data={loading ? [] : items}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        ref={listRef}
+        // Header displaying the number of homes
+        ListHeaderComponent={
+          <Text style={styles.info}>{items.length} vehicles</Text>
         }
       />
     </View>
@@ -106,15 +103,40 @@ const Listings = ({ listings: items, category, refresh }: Props) => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  listContainer: {
+    paddingBottom: 40,
+  },
   listing: {
-    padding: 16,
-    gap: 10,
-    marginVertical: 16,
+    padding: 8,
+    marginBottom: 16,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   image: {
     width: "100%",
-    height: 300,
+    height: 250,
     borderRadius: 10,
+    marginBottom: 10,
+  },
+  listingText: {
+    fontFamily: "aeonik",
+    fontSize: 14,
+    marginBottom: 5,
+    lineHeight: 15,
+  },
+  info: {
+    textAlign: "center",
+    fontFamily: "aeonikLight",
+    fontSize: 18,
+    marginBottom: 10,
   },
 });
 

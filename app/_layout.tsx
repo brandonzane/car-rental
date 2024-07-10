@@ -2,11 +2,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import "react-native-reanimated";
 import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
+import ModalHeaderText from "@/components/ModalHeaderText";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import AnimatedSplashScreen from "@/components/AnimatedSplashScreen";
 
 const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
@@ -52,6 +55,8 @@ export default function RootLayout() {
     aeonikItalic: require("../assets/fonts/Aeonik/AeonikTRIAL-RegularItalic.ttf"),
   });
 
+  const [isSplashReady, setIsSplashReady] = useState(false);
+
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
@@ -72,7 +77,13 @@ export default function RootLayout() {
       publishableKey={CLERK_PUBLISHABLE_KEY!}
       tokenCache={tokenCache}
     >
-      <RootLayoutNav />
+      {isSplashReady ? (
+        <RootLayoutNav />
+      ) : (
+        <AnimatedSplashScreen
+          onAnimationComplete={() => setIsSplashReady(true)}
+        />
+      )}
     </ClerkProvider>
   );
 }
@@ -88,40 +99,44 @@ function RootLayoutNav() {
   }, [isLoaded]);
 
   return (
-    <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="(modals)/signUp"
-        options={{
-          title: "Login or Sign Up",
-          headerTitleStyle: {
-            fontFamily: "aeonik",
-          },
-          presentation: "modal",
-          // headerLeft: () => (
-          //   <TouchableOpacity onPress={() => router.back()}>
-          //     <Ionicons name="close-outline" size={28} />
-          //   </TouchableOpacity>
-          // ),
-        }}
-      />
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="(modals)/signUp"
+          options={{
+            title: "Login or Sign Up",
+            headerTitleStyle: {
+              fontFamily: "aeonik",
+            },
+            presentation: "modal",
+            headerLeft: () => (
+              <TouchableOpacity onPress={() => router.back()}>
+                <Ionicons name="close-outline" size={28} />
+              </TouchableOpacity>
+            ),
+          }}
+        />
 
-      <Stack.Screen
-        name="listing/[id]"
-        options={{ headerTitle: "", headerTransparent: true }}
-      />
-      <Stack.Screen
-        name="(modals)/booking"
-        options={{
-          presentation: "transparentModal",
-          animation: "fade",
-          headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()}>
-              <Ionicons name="close-outline" size={28} />
-            </TouchableOpacity>
-          ),
-        }}
-      />
-    </Stack>
+        <Stack.Screen
+          name="listing/[id]"
+          options={{ headerTitle: "", headerTransparent: true }}
+        />
+        <Stack.Screen
+          name="(modals)/booking"
+          options={{
+            presentation: "transparentModal",
+            animation: "fade",
+            headerTransparent: true,
+            headerTitle: () => <ModalHeaderText />,
+            headerLeft: () => (
+              <TouchableOpacity onPress={() => router.back()}>
+                <Ionicons name="close-outline" size={28} />
+              </TouchableOpacity>
+            ),
+          }}
+        />
+      </Stack>
+    </GestureHandlerRootView>
   );
 }
