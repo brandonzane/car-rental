@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "drive-app",
+    "name": "Drive",
     "slug": "drive-app",
     "version": "0.0.1",
     "orientation": "portrait",
@@ -19,14 +19,18 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.brandonzane.driveapp"
     },
     "web": {
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-    "plugins": ["expo-router", "expo-secure-store"],
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ],
     "experiments": {
       "typedRoutes": true,
       "tsconfigPaths": true
@@ -36,7 +40,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "f1a47fe9-70fb-4a0d-99bb-b1cc93c66371"
+        "projectId": "2439966e-4fcc-44ef-91d1-9dd52bd47801"
       }
     }
   }
