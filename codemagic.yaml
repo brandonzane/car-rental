@@ -12,7 +12,7 @@ workflows:
       groups:
         - google_play # <-- (Includes GCLOUD_SERVICE_ACCOUNT_CREDENTIALS <-- Put your google-services.json)
       vars:
-        PACKAGE_NAME: "com.brandonzane.driveapp" # <-- Put your package name here e.g. com.domain.myapp
+        PACKAGE_NAME: "com.brandonzane.driveapp" #Pachage name here
       node: 16.14.2
     triggering:
       events:

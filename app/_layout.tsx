@@ -9,7 +9,7 @@ import "react-native-reanimated";
 import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
 import ModalHeaderText from "@/components/ModalHeaderText";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import AnimatedSplashScreen from "@/components/AnimatedSplashScreen";
+// import AnimatedSplashScreen from "@/components/AnimatedSplashScreen";
 
 const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
@@ -55,7 +55,7 @@ export default function RootLayout() {
     aeonikItalic: require("../assets/fonts/Aeonik/AeonikTRIAL-RegularItalic.ttf"),
   });
 
-  const [isSplashReady, setIsSplashReady] = useState(false);
+  // const [isSplashReady, setIsSplashReady] = useState(false);
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
@@ -77,13 +77,7 @@ export default function RootLayout() {
       publishableKey={CLERK_PUBLISHABLE_KEY!}
       tokenCache={tokenCache}
     >
-      {isSplashReady ? (
-        <RootLayoutNav />
-      ) : (
-        <AnimatedSplashScreen
-          onAnimationComplete={() => setIsSplashReady(true)}
-        />
-      )}
+      <RootLayoutNav />
     </ClerkProvider>
   );
 }
