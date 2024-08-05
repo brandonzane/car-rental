@@ -15,32 +15,20 @@ import { Link } from "expo-router";
 
 const categories = [
   {
-    name: "Tiny homes",
+    name: "SUVs",
     icon: "home",
   },
   {
-    name: "Cabins",
+    name: "Sedans",
     icon: "house-siding",
   },
   {
-    name: "Trending",
+    name: "EVs",
     icon: "local-fire-department",
   },
   {
-    name: "Play",
+    name: "Hatchbacks",
     icon: "videogame-asset",
-  },
-  {
-    name: "City",
-    icon: "apartment",
-  },
-  {
-    name: "Beachfront",
-    icon: "beach-access",
-  },
-  {
-    name: "Countryside",
-    icon: "nature-people",
   },
 ];
 

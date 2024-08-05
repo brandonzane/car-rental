@@ -2,14 +2,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useState } from "react";
-import { TouchableOpacity } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { TouchableOpacity, View } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import "react-native-reanimated";
 import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
 import ModalHeaderText from "@/components/ModalHeaderText";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-// import AnimatedSplashScreen from "@/components/AnimatedSplashScreen";
+import AnimatedSplashScreen from "@/components/AnimatedSplashScreen";
 
 const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
@@ -42,9 +42,6 @@ export const unstable_settings = {
   initialRouteName: "(tabs)",
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
-
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     aeonik: require("../assets/fonts/Aeonik/AeonikTRIAL-Regular.ttf"),
@@ -55,20 +52,34 @@ export default function RootLayout() {
     aeonikItalic: require("../assets/fonts/Aeonik/AeonikTRIAL-RegularItalic.ttf"),
   });
 
-  // const [isSplashReady, setIsSplashReady] = useState(false);
+  const [appIsReady, setAppIsReady] = useState(false);
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
+  useEffect(() => {
+    async function prepare() {
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        setAppIsReady(true);
+      }
+    }
+
+    prepare();
+  }, []);
+
+  const onLayoutRootView = useCallback(async () => {
+    if (appIsReady) {
+      await SplashScreen.hideAsync();
+    }
+  }, [appIsReady]);
+
   useEffect(() => {
     if (error) throw error;
   }, [error]);
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
+  if (!appIsReady || !loaded) {
     return null;
   }
 
@@ -77,7 +88,9 @@ export default function RootLayout() {
       publishableKey={CLERK_PUBLISHABLE_KEY!}
       tokenCache={tokenCache}
     >
-      <RootLayoutNav />
+      <View style={{ flex: 1 }}>
+        <RootLayoutNav />
+      </View>
     </ClerkProvider>
   );
 }

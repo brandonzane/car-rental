@@ -1,82 +1,71 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
   Image,
   StyleSheet,
   TouchableOpacity,
-  Alert,
+  ScrollView,
   SafeAreaView,
+  StatusBar,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { useUser, useAuth, useClerk } from "@clerk/clerk-expo";
+import { useUser, useClerk } from "@clerk/clerk-expo";
 import Colors from "@/constants/Colors";
+import { router } from "expo-router";
 
-const CustomHeader = () => {
-  const navigation = useNavigation();
+interface ProfileOptionProps {
+  title: string;
+  icon: string;
+  onPress: () => void;
+}
 
-  return (
-    <SafeAreaView style={styles.headerContainer}>
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={styles.backButton}
-      >
-        <Ionicons name="chevron-back" size={28} color={Colors.black} />
-      </TouchableOpacity>
-      <Text style={styles.headerTitle}>Your Account</Text>
-      <View style={styles.placeholder} />
-    </SafeAreaView>
-  );
-};
+const ProfileOption: React.FC<ProfileOptionProps> = ({
+  title,
+  icon,
+  onPress,
+}) => (
+  <TouchableOpacity style={styles.optionContainer} onPress={onPress}>
+    <Text style={styles.optionText}>{title}</Text>
+    <Ionicons name={"chevron-forward"} size={24} color={Colors.grey} />
+  </TouchableOpacity>
+);
 
-const ProfilePage = () => {
+const ProfilePage: React.FC = () => {
   const navigation = useNavigation();
   const { user } = useUser();
   const { signOut } = useClerk();
-  const [isLoading, setIsLoading] = useState(false);
-
-  React.useLayoutEffect(() => {
-    navigation.setOptions({
-      header: () => <CustomHeader />,
-    });
-  }, [navigation]);
 
   const handleLogout = async () => {
-    Alert.alert("Logout", "Are you sure you want to log out?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Logout",
-        onPress: async () => {
-          try {
-            await signOut();
-            // navigation.navigate('Login'); // Navigate to login screen
-          } catch (error) {
-            console.error("Error signing out:", error);
-            Alert.alert("Error", "Failed to sign out. Please try again.");
-          }
-        },
-      },
-    ]);
+    try {
+      await signOut();
+      // Navigate to login screen or handle post-logout logic
+    } catch (error) {
+      console.error("Error signing out:", error);
+      // Handle error (e.g., show an alert)
+    }
   };
 
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = async () => {
     Alert.alert(
       "Delete Account",
       "Are you sure you want to delete your account? This action cannot be undone.",
       [
-        { text: "Cancel", style: "cancel" },
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
         {
           text: "Delete",
           style: "destructive",
           onPress: async () => {
-            setIsLoading(true);
             try {
               await user?.delete();
-              setIsLoading(false);
-              // navigation.navigate('Login'); // Navigate to login screen
+              // Navigate to the signup page after successful account deletion
+              navigation.navigate("SignUp" as never);
             } catch (error) {
-              setIsLoading(false);
               console.error("Error deleting account:", error);
               Alert.alert(
                 "Error",
@@ -89,179 +78,217 @@ const ProfilePage = () => {
     );
   };
 
+  const handleOptionPress = (option: string) => {
+    // Handle option press
+    console.log(`${option} pressed`);
+    // Add navigation or other logic here
+  };
+
   if (!user) {
     return (
       <View style={styles.container}>
-        <Text>Loading user data...</Text>
+        <TouchableOpacity
+          style={styles.btnOutline}
+          onPress={() => router.push("/(modals)/signUp" as never)}
+        >
+          <Text style={styles.btnOutlineText}>Sign Up or Log in</Text>
+        </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" />
       <View style={styles.header}>
-        <Image
-          source={{ uri: user.imageUrl || "https://via.placeholder.com/150" }}
-          style={styles.profilePicture}
-        />
-        <Text style={styles.name}>{user.fullName}</Text>
-        <Text style={styles.email}>
-          {user.primaryEmailAddress?.emailAddress}
-        </Text>
-      </View>
-
-      <View style={styles.infoSection}>
-        <Text style={styles.sectionTitle}>Account Information</Text>
-        <View style={styles.infoRow}>
-          <Ionicons name="person-outline" size={24} color="#333" />
-          <Text style={styles.infoText}>{user.fullName}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Ionicons name="mail-outline" size={24} color="#333" />
-          <Text style={styles.infoText}>
-            {user.primaryEmailAddress?.emailAddress}
-          </Text>
-        </View>
-        {user.phoneNumbers && user.phoneNumbers.length > 0 && (
-          <View style={styles.infoRow}>
-            <Ionicons name="call-outline" size={24} color="#333" />
-            <Text style={styles.infoText}>
-              {user.phoneNumbers[0].phoneNumber}
-            </Text>
-          </View>
-        )}
-      </View>
-
-      <View style={styles.buttonSection}>
-        <TouchableOpacity style={styles.button} onPress={handleLogout}>
-          <Text style={styles.buttonText}>Log Out</Text>
-        </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.button, styles.deleteButton]}
-          onPress={handleDeleteAccount}
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
         >
-          <Text style={[styles.buttonText, styles.deleteButtonText]}>
-            Delete Account
-          </Text>
+          <Ionicons name="chevron-back" size={28} color={Colors.white} />
         </TouchableOpacity>
+        <Text style={styles.headerTitle}>Your account</Text>
+        <View style={styles.placeholder} />
       </View>
+      <ScrollView>
+        <TouchableOpacity
+          style={styles.profileSection}
+          onPress={() => handleOptionPress("View profile")}
+        >
+          <Image
+            source={{ uri: user.imageUrl || "https://via.placeholder.com/150" }}
+            style={styles.profilePicture}
+          />
+          <View style={styles.profileInfo}>
+            <Text style={styles.name}>{user.fullName}</Text>
+            <Text style={styles.viewProfile}>View profile</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={24} color={Colors.grey} />
+        </TouchableOpacity>
 
-      {isLoading && (
-        <View style={styles.loadingOverlay}>
-          <Text style={styles.loadingText}>deleting account...</Text>
+        <View style={styles.settingsSection}>
+          <Text style={styles.sectionTitle}>Settings</Text>
+          <ProfileOption
+            title="Account management"
+            icon="chevron-forward"
+            onPress={() => handleOptionPress("Account management")}
+          />
+          <ProfileOption
+            title="Profile visibility"
+            icon="chevron-forward"
+            onPress={() => handleOptionPress("Profile visibility")}
+          />
+          <ProfileOption
+            title="Notifications"
+            icon="chevron-forward"
+            onPress={() => handleOptionPress("Notifications")}
+          />
         </View>
-      )}
-    </View>
+
+        <View style={styles.loginSection}>
+          <Text style={styles.sectionTitle}>Login</Text>
+          <ProfileOption
+            title="Add account"
+            icon="chevron-forward"
+            onPress={() => handleOptionPress("Add account")}
+          />
+          <ProfileOption
+            title="Security"
+            icon="chevron-forward"
+            onPress={() => handleOptionPress("Security")}
+          />
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Text style={styles.logoutText}>Log out</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.deleteAccountButton}
+            onPress={handleDeleteAccount}
+          >
+            <Text style={styles.deleteAccountText}>Delete Account</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.quaternary,
-    fontFamily: "aeonik",
+    backgroundColor: Colors.white,
   },
-  headerContainer: {
+  btnOutline: {
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: Colors.grey,
+    height: 50,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    paddingHorizontal: 10,
+  },
+  btnOutlineText: {
+    color: "#000",
+    fontSize: 16,
+    fontFamily: "aeonik",
+    lineHeight: 20,
+  },
+  header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 16,
-    paddingTop: 25,
-    paddingBottom: 10,
-    backgroundColor: Colors.quaternary,
+    paddingVertical: 10,
+  },
+  signUpText: {
+    color: Colors.primary,
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 20,
+    textDecorationLine: "underline",
   },
   backButton: {
-    padding: 8,
+    padding: 5,
+  },
+  deleteAccountButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginTop: 8,
+  },
+  deleteAccountText: {
+    fontSize: 16,
+    color: Colors.danger,
+    fontWeight: "bold",
   },
   headerTitle: {
-    fontSize: 22,
-    fontFamily: "aeonikLight",
+    fontSize: 20,
+    fontWeight: "bold",
+    color: Colors.dark,
   },
   placeholder: {
-    width: 28, // To balance the back button
+    width: 28,
   },
-  header: {
-    alignItems: "center",
-    padding: 20,
-    backgroundColor: Colors.quaternary,
-  },
-  profilePicture: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    marginBottom: 10,
-  },
-  name: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 5,
-    fontFamily: "aeonik",
-    lineHeight: 25,
-  },
-  email: {
-    fontSize: 16,
-    color: Colors.grey,
-    fontFamily: "aeonik",
-    lineHeight: 15,
-  },
-  infoSection: {
-    margin: 20,
-    backgroundColor: Colors.quaternary,
-    borderRadius: 10,
-    padding: 15,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 15,
-    fontFamily: "aeonik",
-  },
-  infoRow: {
+  profileSection: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    padding: 16,
   },
-  infoText: {
-    fontSize: 16,
-    marginLeft: 10,
+  profilePicture: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
   },
-  buttonSection: {
-    margin: 20,
+  profileInfo: {
+    flex: 1,
+    marginLeft: 16,
   },
-  button: {
-    backgroundColor: "#FFF",
-    padding: 15,
-    borderRadius: 5,
-    alignItems: "center",
-    marginBottom: 10,
-    fontFamily: "aeonik",
-    borderWidth: 2,
-  },
-  buttonText: {
-    color: Colors.black,
-    fontSize: 16,
-    fontWeight: "bold",
-    fontFamily: "aeonik",
-  },
-  deleteButton: {
-    backgroundColor: "#FFF",
-    borderWidth: 2,
-    fontFamily: "aeonik",
-  },
-  deleteButtonText: {
-    color: Colors.secondary,
-    fontFamily: "aeonik",
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    color: "#FFF",
+  name: {
     fontSize: 18,
     fontWeight: "bold",
+    color: Colors.dark,
+  },
+  viewProfile: {
+    fontSize: 14,
+    color: Colors.grey,
+  },
+  settingsSection: {
+    marginTop: 20,
+  },
+  loginSection: {
+    marginTop: 20,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: Colors.dark,
+    marginLeft: 16,
+    marginBottom: 10,
+  },
+  optionContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  optionText: {
+    fontSize: 16,
+    color: Colors.dark,
+  },
+  logoutButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  logoutText: {
+    fontSize: 16,
+    color: Colors.dark,
+  },
+  loadingText: {
+    color: Colors.dark,
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 20,
   },
 });
 
