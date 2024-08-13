@@ -1,17 +1,15 @@
+import React, { useState } from "react";
 import { View } from "react-native";
-import React, { useMemo, useState } from "react";
 import { Stack } from "expo-router";
 import ExploreHeader from "@/components/ExploreHeader";
-import Listings from "@/components/Listings";
-import listingsData from "@/assets/data/airbnb-listings.json";
 import ListingsMap from "@/components/ListingsMap";
-import listingsDataGeo from "@/assets/data/airbnb-listings.geo.json";
 import ListingsBottomSheet from "@/components/ListingsBottomSheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useListings } from "@/hooks/useListings";
 
 const Home = () => {
-  const [category, setCategory] = useState<string>("Vehicles");
-  const items = useMemo(() => listingsData as any, []);
+  const [category, setCategory] = useState<string>("All");
+  const { listings, loading, error } = useListings(category);
 
   const onDataChanged = (category: string) => {
     setCategory(category);
@@ -25,9 +23,8 @@ const Home = () => {
         }}
       />
       <GestureHandlerRootView>
-        {/* <Listings listings={items} category={category} /> */}
-        <ListingsMap listings={listingsDataGeo} />
-        <ListingsBottomSheet listings={items} category={category} />
+        <ListingsMap listings={{ features: listings as any }} />
+        <ListingsBottomSheet listings={listings as any} category={category} />
       </GestureHandlerRootView>
     </View>
   );

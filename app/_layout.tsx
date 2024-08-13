@@ -9,7 +9,6 @@ import "react-native-reanimated";
 import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
 import ModalHeaderText from "@/components/ModalHeaderText";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import AnimatedSplashScreen from "@/components/AnimatedSplashScreen";
 
 const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 

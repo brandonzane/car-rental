@@ -1,43 +1,79 @@
 import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 import React, { memo, useEffect, useRef } from "react";
 import { defaultStyles } from "@/constants/Styles";
-import { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import { Marker } from "react-native-maps";
 import MapView from "react-native-map-clustering";
-import { ListingGeo } from "@/interfaces/listingGeo";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
+import * as Location from "expo-location";
+
+interface Listing {
+  id: string | number;
+  latitude: number | null;
+  longitude: number | null;
+  price: number;
+  // Other properties you may have
+  car_type?: string;
+  medium_url?: string;
+  name?: string;
+}
 
 interface Props {
-  listings: any;
+  listings: {
+    features: Listing[];
+  };
 }
 
 const INITIAL_REGION = {
-  latitude: 52.52,
-  longitude: 13.405,
-  latitudeDelta: 0.5,
-  longitudeDelta: 0.5,
+  latitude: 37.33,
+  longitude: -122,
+  latitudeDelta: 9,
+  longitudeDelta: 9,
 };
 
-const ListingsMap = ({ listings }: Props) => {
+const ListingsMap = memo(({ listings }: Props) => {
   const router = useRouter();
+  const mapRef = useRef<any>(null);
 
-  const onMarkerSelected = (item: ListingGeo) => {
-    router.push(`/listing/${item.properties.id}`);
+  useEffect(() => {
+    onLocateMe();
+  }, []);
+
+  const onMarkerSelected = (item: Listing) => {
+    router.push(`/listing/${item.id}`);
+  };
+
+  const onLocateMe = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      console.warn("Location permission not granted");
+      return;
+    }
+
+    let location = await Location.getCurrentPositionAsync({});
+
+    const region = {
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+      latitudeDelta: 7,
+      longitudeDelta: 7,
+    };
+
+    mapRef.current?.animateToRegion(region);
   };
 
   const renderCluster = (cluster: any) => {
     const { id, geometry, onPress, properties } = cluster;
-    const points = properties.point_count;
 
     return (
       <Marker
         key={`cluster-${id}`}
-        onPress={onPress}
         coordinate={{
           longitude: geometry.coordinates[0],
           latitude: geometry.coordinates[1],
         }}
+        onPress={onPress}
       >
         <View style={styles.marker}>
           <Text
@@ -47,40 +83,70 @@ const ListingsMap = ({ listings }: Props) => {
               fontFamily: "aeonik",
             }}
           >
-            {points}
+            {properties.point_count}
           </Text>
         </View>
       </Marker>
     );
   };
 
+  // Check if listings and features are present
+  if (!listings || !listings.features || !Array.isArray(listings.features)) {
+    console.warn("Listings or features array is missing or not an array");
+    return null;
+  }
+
   return (
     <View style={defaultStyles.container}>
       <MapView
-        style={StyleSheet.absoluteFill}
-        provider={PROVIDER_GOOGLE}
-        showsUserLocation
-        showsMyLocationButton
+        ref={mapRef}
+        animationEnabled={false}
+        style={StyleSheet.absoluteFillObject}
         initialRegion={INITIAL_REGION}
         clusterColor="#fff"
         clusterTextColor="#000"
         clusterFontFamily="aeonik"
         renderCluster={renderCluster}
       >
-        {listings.features.map((item: any) => (
-          <Marker
-            key={item.properties.id}
-            onPress={() => onMarkerSelected(item)}
-            coordinate={{
-              latitude: +item.properties.latitude,
-              longitude: +item.properties.longitude,
-            }}
-          />
-        ))}
+        {listings.features.map((item: Listing, index: number) => {
+          // Validate each listing's properties
+          if (
+            typeof item.latitude !== "number" ||
+            typeof item.longitude !== "number" ||
+            (typeof item.id !== "string" && typeof item.id !== "number") ||
+            typeof item.price !== "number"
+          ) {
+            console.warn(
+              `Listing at index ${index} is missing required properties`,
+              item
+            );
+            return null;
+          }
+
+          const { latitude, longitude, id, price } = item;
+
+          return (
+            <Marker
+              coordinate={{
+                latitude,
+                longitude,
+              }}
+              key={id.toString()}
+              onPress={() => onMarkerSelected(item)}
+            >
+              <View style={styles.marker}>
+                <Text style={styles.markerText}>€ {price}</Text>
+              </View>
+            </Marker>
+          );
+        })}
       </MapView>
+      <TouchableOpacity style={styles.locateBtn} onPress={onLocateMe}>
+        <Ionicons name="navigate" size={24} color={Colors.dark} />
+      </TouchableOpacity>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -103,7 +169,7 @@ const styles = StyleSheet.create({
   },
   markerText: {
     fontSize: 14,
-    fontFamily: "mon-sb",
+    fontFamily: "aeonik",
   },
   locateBtn: {
     position: "absolute",

@@ -50,8 +50,8 @@ interface Properties {
   smart_location: string;
   country_code: string;
   country: string;
-  latitude: string;
-  longitude: string;
+  latitude: number;
+  longitude: number;
   property_type: string;
   room_type: string;
   accommodates: number;

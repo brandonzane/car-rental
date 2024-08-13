@@ -1,58 +1,27 @@
-import {
-  View,
-  Text,
-  FlatList,
-  ListRenderItem,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  RefreshControl,
-  Dimensions,
-} from "react-native";
-import {
-  BottomSheetFlatList,
-  BottomSheetFlatListMethods,
-} from "@gorhom/bottom-sheet";
-import React, { useEffect, useRef, useState } from "react";
-import { defaultStyles } from "@/constants/Styles";
+import React from "react";
+import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
+import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { Link } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { Listing } from "@/hooks/useListings";
 
 interface Props {
-  listings: any[];
+  listings: Listing[];
   category: string;
-  refresh: number;
+  loading: boolean;
+  error: string | null;
 }
 
-const Listings = ({ listings: items, refresh, category }: Props) => {
-  // Ref for BottomSheetFlatList
-  const listRef = useRef<BottomSheetFlatListMethods>(null);
-  // State to control loading state
-  const [loading, setLoading] = useState<boolean>(false);
+const Listings = ({ listings, category, loading, error }: Props) => {
+  if (loading) {
+    return <Text style={styles.info}>Loading...</Text>;
+  }
 
-  // Update the view to scroll the list back to the top when refresh is triggered
-  useEffect(() => {
-    if (refresh) {
-      scrollListTop();
-    }
-  }, [refresh]);
+  if (error) {
+    return <Text style={styles.info}>Error: {error}</Text>;
+  }
 
-  // Scroll the list to the top
-  const scrollListTop = () => {
-    listRef.current?.scrollToOffset({ offset: 0, animated: true });
-  };
-
-  // Use for "updating" the views data after the category changes
-  useEffect(() => {
-    setLoading(true);
-
-    // Simulate a loading delay
-    setTimeout(() => {
-      setLoading(false);
-    }, 200);
-  }, [category]);
-
-  const renderRow: ListRenderItem<any> = ({ item }) => (
+  const renderRow = ({ item }: { item: Listing }) => (
     <Link href={`/listing/${item.id}`} asChild>
       <TouchableOpacity activeOpacity={0.9}>
         <View style={styles.listing}>
@@ -87,15 +56,12 @@ const Listings = ({ listings: items, refresh, category }: Props) => {
   );
 
   return (
-    <View style={defaultStyles.container}>
-      {/* BottomSheetFlatList for displaying listings */}
+    <View style={styles.container}>
       <BottomSheetFlatList
         renderItem={renderRow}
-        data={loading ? [] : items}
-        ref={listRef}
-        // Header displaying the number of homes
+        data={listings}
         ListHeaderComponent={
-          <Text style={styles.info}>{items.length} vehicles</Text>
+          <Text style={styles.info}>{listings.length} vehicles</Text>
         }
       />
     </View>
