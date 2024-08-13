@@ -9,9 +9,11 @@ import { Listing } from "@/interfaces/listing";
 interface Props {
   listings: Listing[];
   category: string;
+  loading: boolean;
+  error: string | null;
 }
 
-const ListingsBottomSheet = ({ listings, category }: Props) => {
+const ListingsBottomSheet = ({ listings, category, loading, error }: Props) => {
   const snapPoints = useMemo(() => ["10%", "100%"], []);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [refresh, setRefresh] = useState(0);
@@ -31,7 +33,13 @@ const ListingsBottomSheet = ({ listings, category }: Props) => {
       style={styles.sheetContainer}
     >
       <View style={styles.contentContainer}>
-        <Listings listings={listings} refresh={refresh} category={category} />
+        <Listings
+          listings={listings}
+          category={category}
+          refresh={refresh}
+          loading={loading}
+          error={error}
+        />
         <View style={styles.absoluteView}>
           <TouchableOpacity onPress={onShowMap} style={styles.btn}>
             <Text
@@ -55,7 +63,7 @@ const ListingsBottomSheet = ({ listings, category }: Props) => {
 const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
-    backgroundColor: Colors.quaternary,
+    backgroundColor: Colors.white,
   },
   absoluteView: {
     position: "absolute",

@@ -32,6 +32,7 @@ const Layout = () => {
       <Tabs.Screen
         name="favorites"
         options={{
+          headerShown: false,
           tabBarLabel: "Favorites",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="bookmark-outline" color={color} size={size} />
@@ -42,6 +43,7 @@ const Layout = () => {
       <Tabs.Screen
         name="inbox"
         options={{
+          headerShown: false,
           tabBarLabel: "Inbox",
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
@@ -56,6 +58,7 @@ const Layout = () => {
       <Tabs.Screen
         name="profile"
         options={{
+          headerShown: false,
           tabBarLabel: "Profile",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person-circle-outline" color={color} size={size} />

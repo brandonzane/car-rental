@@ -175,6 +175,7 @@ const ProfilePage: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: 10,
     backgroundColor: Colors.white,
   },
   btnOutline: {
@@ -198,12 +199,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    fontFamily: "aeonik",
     paddingHorizontal: 16,
     paddingVertical: 10,
   },
   signUpText: {
     color: Colors.primary,
     fontSize: 16,
+    fontFamily: "aeonik",
     textAlign: "center",
     marginTop: 20,
     textDecorationLine: "underline",
@@ -219,11 +222,12 @@ const styles = StyleSheet.create({
   deleteAccountText: {
     fontSize: 16,
     color: Colors.danger,
+    fontFamily: "aeonik",
     fontWeight: "bold",
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 30,
+    fontFamily: "aeonik",
     color: Colors.dark,
   },
   placeholder: {
@@ -242,10 +246,12 @@ const styles = StyleSheet.create({
   profileInfo: {
     flex: 1,
     marginLeft: 16,
+    fontFamily: "aeonik",
   },
   name: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 22,
+    fontWeight: "600",
+    fontFamily: "aeonikItalic",
     color: Colors.dark,
   },
   viewProfile: {

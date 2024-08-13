@@ -1,5 +1,5 @@
 export interface Listing {
-  id: string;
+  id: number;
   listing_url: string;
   scrape_id: string;
   last_scraped: string;
@@ -87,6 +87,7 @@ export interface Listing {
   calculated_host_listings_count: number;
   reviews_per_month: number;
   geolocation: Geolocation;
+  car_type: string;
   features: string[];
 }
 
