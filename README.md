@@ -4,4 +4,5 @@
 # Tech Stack
 ###
 
-![alt text](https://github.com/brandonzane/car-rental/assets/images/Drive.gif.jpg?raw=true)
+![alt text](https://github.com/brandonzane/car-rental/tree/master/assets/images/Drive.gif.jpg?raw=true)
+
