@@ -1,5 +1,5 @@
 export default {
-  primary: "#B2EF82",
+  primary: "#004C4C",
   primaryMuted: "#E4ECE6",
   secondary: "#FF8F8F",
   tertiary: "#FFE45D",
@@ -10,4 +10,6 @@ export default {
   dark: "#1A1A1A",
   white: "#FFFFFF",
   danger: "#FF0000",
+  lightGrey: "#F5F5F5",
+  surface: "#b2d8d8",
 };

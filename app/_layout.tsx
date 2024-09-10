@@ -1,3 +1,4 @@
+import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
@@ -6,38 +7,56 @@ import { useCallback, useEffect, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import "react-native-reanimated";
-import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
-import ModalHeaderText from "@/components/ModalHeaderText";
+import { ClerkProvider, useAuth, useClerk } from "@clerk/clerk-expo";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import CustomHeader from "@/components/CustomHeader";
 
 const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 const tokenCache = {
   async getToken(key: string) {
     try {
-      return SecureStore.getItemAsync(key);
+      const value = await SecureStore.getItemAsync(key);
+      return value;
     } catch (err) {
+      console.error("Error retrieving token:", err);
       return null;
     }
   },
   async saveToken(key: string, value: string) {
     try {
-      return SecureStore.setItemAsync(key, value);
+      await SecureStore.setItemAsync(key, value);
     } catch (err) {
-      return;
+      console.error("Error saving token:", err);
     }
   },
 };
 
-// import { useColorScheme } from '@/components/useColorScheme';
+function CustomJWTCache() {
+  const { getToken } = useAuth();
+  const clerk = useClerk();
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from "expo-router";
+  useEffect(() => {
+    const fetchToken = async () => {
+      try {
+        const token = await getToken();
+        if (token) {
+          await SecureStore.setItemAsync("__clerk_client_jwt", token);
+        }
+      } catch (error) {
+        console.error("Error fetching or storing token:", error);
+      }
+    };
+
+    fetchToken();
+  }, [getToken]);
+
+  return null;
+}
+
+export { ErrorBoundary } from "expo-router";
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: "(tabs)",
 };
 
@@ -53,13 +72,14 @@ export default function RootLayout() {
 
   const [appIsReady, setAppIsReady] = useState(false);
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     async function prepare() {
       try {
+        // SecureStore doesn't have an initializeSecureStore method
+        // We'll remove this line as it's not needed
         await new Promise((resolve) => setTimeout(resolve, 2000));
       } catch (e) {
-        console.warn(e);
+        console.warn("Error during app preparation:", e);
       } finally {
         setAppIsReady(true);
       }
@@ -87,7 +107,8 @@ export default function RootLayout() {
       publishableKey={CLERK_PUBLISHABLE_KEY!}
       tokenCache={tokenCache}
     >
-      <View style={{ flex: 1 }}>
+      <CustomJWTCache />
+      <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
         <RootLayoutNav />
       </View>
     </ClerkProvider>
@@ -102,31 +123,50 @@ function RootLayoutNav() {
     if (isLoaded && !isSignedIn) {
       router.push("/(modals)/signUp");
     }
-  }, [isLoaded]);
+  }, [isLoaded, isSignedIn]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack
+        screenOptions={{
+          header: ({ options, route }) => {
+            // Don't render the header for the listing detail page
+            if (route.name === "listing/[id]") {
+              return null;
+            }
+            return (
+              <CustomHeader
+                title={options.headerTitle?.toString() || route.name}
+                showBackButton={route.name !== "(tabs)"}
+                customLeftButton={
+                  options.headerLeft && options.headerLeft({ canGoBack: true })
+                }
+              />
+            );
+          },
+        }}
+      >
+        <Stack.Screen
+          name="(tabs)"
+          options={{ headerShown: false, headerTitle: "" }}
+        />
         <Stack.Screen
           name="(modals)/signUp"
           options={{
-            title: "Login or Sign Up",
-            headerTitleStyle: {
-              fontFamily: "aeonik",
-            },
+            headerTitle: "Login or Sign Up",
             presentation: "modal",
             headerLeft: () => (
               <TouchableOpacity onPress={() => router.back()}>
-                <Ionicons name="close-outline" size={28} />
+                <Ionicons name="close-outline" size={28} color="#333" />
               </TouchableOpacity>
             ),
           }}
         />
-
         <Stack.Screen
           name="listing/[id]"
-          options={{ headerTitle: "", headerTransparent: true }}
+          options={{
+            headerShown: false, // This ensures no header is shown from the layout
+          }}
         />
         <Stack.Screen
           name="(modals)/booking"
@@ -134,10 +174,10 @@ function RootLayoutNav() {
             presentation: "transparentModal",
             animation: "fade",
             headerTransparent: true,
-            headerTitle: () => <ModalHeaderText />,
+            headerTitle: "Booking",
             headerLeft: () => (
               <TouchableOpacity onPress={() => router.back()}>
-                <Ionicons name="close-outline" size={28} />
+                <Ionicons name="close-outline" size={28} color="#333" />
               </TouchableOpacity>
             ),
           }}

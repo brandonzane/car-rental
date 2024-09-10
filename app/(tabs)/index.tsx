@@ -24,10 +24,14 @@ const Home = () => {
       />
       <GestureHandlerRootView>
         <ListingsMap listings={{ features: listings as any }} />
-        <ListingsBottomSheet listings={listings as any} category={category} />
+        <ListingsBottomSheet
+          listings={listings as any}
+          category={category}
+          loading={loading}
+          error={error}
+        />
       </GestureHandlerRootView>
     </View>
   );
 };
-
 export default Home;
